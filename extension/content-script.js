@@ -8,6 +8,7 @@ function detectBroker() {
   if (window.FidelityParser && window.FidelityParser.detect()) return window.FidelityParser;
   if (window.RobinhoodParser && window.RobinhoodParser.detect()) return window.RobinhoodParser;
   if (window.WebullParser && window.WebullParser.detect()) return window.WebullParser;
+  if (window.YahooParser && window.YahooParser.detect()) return window.YahooParser;
   return null;
 }
 

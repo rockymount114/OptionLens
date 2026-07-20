@@ -11,7 +11,8 @@
   "host_permissions": [
     "https://*.fidelity.com/*",
     "https://*.robinhood.com/*",
-    "https://*.webull.com/*"
+    "https://*.webull.com/*",
+    "https://*.yahoo.com/*"
   ],
   "background": {
     "service_worker": "service-worker.js"
@@ -28,13 +29,15 @@
       "matches": [
         "https://*.fidelity.com/*",
         "https://*.robinhood.com/*",
-        "https://*.webull.com/*"
+        "https://*.webull.com/*",
+        "https://*.yahoo.com/*"
       ],
       "js": [
         "parsers/common.js",
         "parsers/fidelity.js",
         "parsers/robinhood.js",
         "parsers/webull.js",
+        "parsers/yahoo.js",
         "content-script.js"
       ],
       "run_at": "document_end"

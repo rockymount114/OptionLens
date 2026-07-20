@@ -27,10 +27,9 @@ def create_app(config_class=Config):
     app.register_blueprint(webhooks_bp, url_prefix='/api/webhooks')
     app.register_blueprint(health_bp, url_prefix='/api')
 
-    # Automatically create tables in local SQLite development mode
-    if app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite'):
-        with app.app_context():
-            db.create_all()
-            print("[OptionLens] SQLite database tables initialized.")
+    # Automatically create tables if they do not exist
+    with app.app_context():
+        db.create_all()
+        print("[OptionLens] Database tables initialized.")
 
     return app
