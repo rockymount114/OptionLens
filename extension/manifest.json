@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "OptionLens",
+  "version": "1.0.0",
+  "description": "Plain-English options risk & strategy analysis inside your broker tab.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "https://*.fidelity.com/*",
+    "https://*.robinhood.com/*",
+    "https://*.webull.com/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "OptionLens"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.fidelity.com/*",
+        "https://*.robinhood.com/*",
+        "https://*.webull.com/*"
+      ],
+      "js": [
+        "parsers/common.js",
+        "parsers/fidelity.js",
+        "parsers/robinhood.js",
+        "parsers/webull.js",
+        "content-script.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

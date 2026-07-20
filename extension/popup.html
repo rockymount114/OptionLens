@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OptionLens</title>
+  <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+  <div class="header">
+    <div class="logo-icon">O</div>
+    <div class="title-container">
+      <h1>OptionLens</h1>
+      <p>Option Risk Explainer & Payoff Tool</p>
+    </div>
+  </div>
+
+  <!-- State A: Authenticated View -->
+  <div id="auth-view" class="hidden">
+    <div class="card">
+      <div class="status-row">
+        <span>Account:</span>
+        <span id="user-email" class="status-val">-</span>
+      </div>
+      <div class="status-row">
+        <span>Plan:</span>
+        <span id="user-plan" class="badge badge-free">Free</span>
+      </div>
+      
+      <div class="quota-container">
+        <div class="quota-label">
+          <span>Usage this month</span>
+          <span id="usage-fraction">0 / 10</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="progress-bar" class="progress-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <button id="btn-open-panel" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>
+      </svg>
+      Open Analysis Side Panel
+    </button>
+    
+    <button id="btn-upgrade" class="btn btn-secondary hidden">
+      ✨ Upgrade to Pro
+    </button>
+
+    <button id="btn-logout" class="btn btn-secondary">
+      Sign Out
+    </button>
+  </div>
+
+  <!-- State B: Unauthenticated View -->
+  <div id="unauth-view">
+    <div class="card">
+      <div class="input-group">
+        <label for="login-email">Email Address</label>
+        <input type="email" id="login-email" placeholder="you@example.com">
+      </div>
+      <div class="input-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button id="btn-login" class="btn btn-primary">Sign In</button>
+      <button id="btn-toggle-signup" class="btn btn-secondary">Create Account</button>
+      <div id="auth-error" class="auth-error hidden"></div>
+    </div>
+  </div>
+
+  <!-- State C: Registration View (Shared card structure, toggled) -->
+  <div id="signup-view" class="hidden">
+    <div class="card">
+      <div class="input-group">
+        <label for="signup-email">Email Address</label>
+        <input type="email" id="signup-email" placeholder="you@example.com">
+      </div>
+      <div class="input-group">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" placeholder="••••••••">
+      </div>
+      <button id="btn-signup" class="btn btn-primary">Register</button>
+      <button id="btn-toggle-login" class="btn btn-secondary">Back to Sign In</button>
+      <div id="signup-error" class="auth-error hidden"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Powering educational options trade analysis.
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

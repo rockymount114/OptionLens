@@ -1,0 +1,26 @@
+# Ignore caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore local virtualenv
+venv/
+.venv/
+env/
+
+# Ignore databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Ignore git
+.git/
+.gitignore
+
+# Ignore tests
+tests/
+
+# Ignore documentation
+docs/
+*.md
