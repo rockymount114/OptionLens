@@ -15,117 +15,144 @@
   <!-- Error display container -->
   <div id="error-box" class="error-container hidden"></div>
 
-  <!-- Section 1: Interactive Trade Parameters -->
-  <div class="section-card">
-    <div class="section-title">
-      <span>Contract Parameters</span>
-      <span id="detected-broker-badge" style="font-size: 10px; opacity: 0.6;"></span>
+  <!-- Embedded Authentication Form (Visible when logged out) -->
+  <div id="sidepanel-auth-card" class="section-card hidden">
+    <div class="section-title">Sign In to OptionLens</div>
+    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4;">
+      Sign in or create an account directly from this panel to access paywall analyses, scenario calculations, and explanation histories.
+    </p>
+    
+    <div class="form-group" style="margin-bottom: 10px;">
+      <label for="auth-email">Email Address</label>
+      <input type="email" id="auth-email" placeholder="you@example.com">
     </div>
     
-    <div class="field-grid">
-      <div class="form-group">
-        <label for="input-symbol">Symbol</label>
-        <input type="text" id="input-symbol" placeholder="e.g. TSLA">
-      </div>
-      <div class="form-group">
-        <label for="input-strategy">Strategy</label>
-        <select id="input-strategy">
-          <option value="covered_call">Covered Call</option>
-          <option value="cash_secured_put">Cash-Secured Put</option>
-          <option value="long_call">Long Call</option>
-          <option value="long_put">Long Put</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="input-underlying">Stock Price ($)</label>
-        <input type="number" id="input-underlying" step="0.01" placeholder="0.00">
-      </div>
-      <div class="form-group">
-        <label for="input-strike">Strike ($)</label>
-        <input type="number" id="input-strike" step="0.50" placeholder="0.00">
-      </div>
-      <div class="form-group">
-        <label for="input-premium">Premium ($)</label>
-        <input type="number" id="input-premium" step="0.01" placeholder="0.00">
-      </div>
-      <div class="form-group">
-        <label for="input-contracts">Contracts</label>
-        <input type="number" id="input-contracts" min="1" step="1" value="1">
-      </div>
-      <div class="form-group">
-        <label for="input-expiration">Expiration</label>
-        <input type="date" id="input-expiration">
-      </div>
-      <div class="form-group">
-        <label for="input-shares">Shares/Contract</label>
-        <input type="number" id="input-shares" step="100" value="100">
-      </div>
+    <div class="form-group" style="margin-bottom: 14px;">
+      <label for="auth-password">Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••">
     </div>
-
+    
     <div class="action-row">
-      <button id="btn-pull-dom" class="btn btn-secondary">
-        🔄 Read Page
-      </button>
-      <button id="btn-analyze" class="btn btn-primary">
-        <span>Analyze Trade</span>
-      </button>
+      <button id="btn-side-login" class="btn btn-primary">Sign In</button>
+      <button id="btn-side-register" class="btn btn-secondary">Register</button>
     </div>
+    <div id="auth-msg" style="font-size: 11px; margin-top: 8px; text-align: center; color: var(--danger);" class="hidden"></div>
   </div>
 
-  <!-- Section 2: Payoff Metrics (Local / Realtime Engine) -->
-  <div class="section-card">
-    <div class="section-title">Payoff Analysis</div>
-    <div class="metrics-row">
-      <div class="metric-box">
-        <div class="metric-label">Max Profit</div>
-        <div id="metric-max-profit" class="metric-value value-green">$0.00</div>
+  <!-- Main Sidepanel Content (Visible when logged in) -->
+  <div id="sidepanel-main-content">
+    <!-- Section 1: Interactive Trade Parameters -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>Contract Parameters</span>
+        <span id="detected-broker-badge" style="font-size: 10px; opacity: 0.6;"></span>
       </div>
-      <div class="metric-box">
-        <div class="metric-label">Max Loss</div>
-        <div id="metric-max-loss" class="metric-value value-red">$0.00</div>
+      
+      <div class="field-grid">
+        <div class="form-group">
+          <label for="input-symbol">Symbol</label>
+          <input type="text" id="input-symbol" placeholder="e.g. TSLA">
+        </div>
+        <div class="form-group">
+          <label for="input-strategy">Strategy</label>
+          <select id="input-strategy">
+            <option value="covered_call">Covered Call</option>
+            <option value="cash_secured_put">Cash-Secured Put</option>
+            <option value="long_call">Long Call</option>
+            <option value="long_put">Long Put</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="input-underlying">Stock Price ($)</label>
+          <input type="number" id="input-underlying" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="input-strike">Strike ($)</label>
+          <input type="number" id="input-strike" step="0.50" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="input-premium">Premium ($)</label>
+          <input type="number" id="input-premium" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="input-contracts">Contracts</label>
+          <input type="number" id="input-contracts" min="1" step="1" value="1">
+        </div>
+        <div class="form-group">
+          <label for="input-expiration">Expiration</label>
+          <input type="date" id="input-expiration">
+        </div>
+        <div class="form-group">
+          <label for="input-shares">Shares/Contract</label>
+          <input type="number" id="input-shares" step="100" value="100">
+        </div>
       </div>
-      <div class="metric-box">
-        <div class="metric-label">Breakeven</div>
-        <div id="metric-breakeven" class="metric-value">$0.00</div>
-      </div>
-      <div class="metric-box">
-        <div class="metric-label">Yield (Return)</div>
-        <div id="metric-yield" class="metric-value value-amber">0.0%</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Section 3: AI / Server-Side Explanation -->
-  <div class="section-card">
-    <div class="section-title">Educational Explanation</div>
-    <div id="explanation-text" class="explanation-box">
-      Click "Analyze Trade" to fetch a plain-English structural description of this strategy.
+      <div class="action-row">
+        <button id="btn-pull-dom" class="btn btn-secondary">
+          🔄 Read Page
+        </button>
+        <button id="btn-analyze" class="btn btn-primary">
+          <span>Analyze Trade</span>
+        </button>
+      </div>
     </div>
-    
-    <div id="assignment-container" class="risk-item risk-warning hidden">
-      <strong>Assignment Risk:</strong> <span id="assignment-risk-text">-</span>
-    </div>
-  </div>
 
-  <!-- Section 4: What-if Scenarios -->
-  <div class="section-card">
-    <div class="section-title">What-If Scenarios (at Expiry)</div>
-    <table class="scenario-table">
-      <thead>
-        <tr>
-          <th>Stock Price</th>
-          <th>Price Change</th>
-          <th>Outcome / P&L</th>
-        </tr>
-      </thead>
-      <tbody id="scenario-tbody">
-        <tr>
-          <td colspan="3" style="text-align: center; color: var(--text-muted);">
-            No data loaded. Fill inputs to generate.
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Section 2: Payoff Metrics (Local / Realtime Engine) -->
+    <div class="section-card">
+      <div class="section-title">Payoff Analysis</div>
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div class="metric-label">Max Profit</div>
+          <div id="metric-max-profit" class="metric-value value-green">$0.00</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Max Loss</div>
+          <div id="metric-max-loss" class="metric-value value-red">$0.00</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Breakeven</div>
+          <div id="metric-breakeven" class="metric-value">$0.00</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Yield (Return)</div>
+          <div id="metric-yield" class="metric-value value-amber">0.0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: AI / Server-Side Explanation -->
+    <div class="section-card">
+      <div class="section-title">Educational Explanation</div>
+      <div id="explanation-text" class="explanation-box">
+        Click "Analyze Trade" to fetch a plain-English structural description of this strategy.
+      </div>
+      
+      <div id="assignment-container" class="risk-item risk-warning hidden">
+        <strong>Assignment Risk:</strong> <span id="assignment-risk-text">-</span>
+      </div>
+    </div>
+
+    <!-- Section 4: What-if Scenarios -->
+    <div class="section-card">
+      <div class="section-title">What-If Scenarios (at Expiry)</div>
+      <table class="scenario-table">
+        <thead>
+          <tr>
+            <th>Stock Price</th>
+            <th>Price Change</th>
+            <th>Outcome / P&L</th>
+          </tr>
+        </thead>
+        <tbody id="scenario-tbody">
+          <tr>
+            <td colspan="3" style="text-align: center; color: var(--text-muted);">
+              No data loaded. Fill inputs to generate.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Script loads -->

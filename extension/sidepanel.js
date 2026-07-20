@@ -34,8 +34,86 @@ document.addEventListener('DOMContentLoaded', () => {
   // Scenarios
   const scenarioTbody = document.getElementById('scenario-tbody');
 
+  // Embedded Auth elements
+  const sidepanelAuthCard = document.getElementById('sidepanel-auth-card');
+  const sidepanelMainContent = document.getElementById('sidepanel-main-content');
+  const authEmailInput = document.getElementById('auth-email');
+  const authPasswordInput = document.getElementById('auth-password');
+  const btnSideLogin = document.getElementById('btn-side-login');
+  const btnSideRegister = document.getElementById('btn-side-register');
+  const authMsg = document.getElementById('auth-msg');
+
   // Load initial authentication state
   checkAuth();
+
+  // Embedded Sidepanel Auth handlers
+  btnSideLogin.addEventListener('click', () => {
+    const email = authEmailInput.value.trim();
+    const password = authPasswordInput.value;
+    if (!email || !password) {
+      showAuthError('Please enter email and password.');
+      return;
+    }
+    btnSideLogin.disabled = true;
+    btnSideLogin.textContent = 'Signing in...';
+    hideAuthError();
+
+    chrome.runtime.sendMessage({
+      type: 'API_REQUEST',
+      endpoint: '/auth/login',
+      method: 'POST',
+      body: { email, password }
+    }, (response) => {
+      btnSideLogin.disabled = false;
+      btnSideLogin.textContent = 'Sign In';
+      if (response && response.status === 200 && response.data.token) {
+        chrome.runtime.sendMessage({
+          type: 'SET_AUTH_STATE',
+          token: response.data.token,
+          email: response.data.user.email
+        }, () => {
+          checkAuth();
+        });
+      } else {
+        const msg = response && response.data ? response.data.error : 'Login failed.';
+        showAuthError(msg);
+      }
+    });
+  });
+
+  btnSideRegister.addEventListener('click', () => {
+    const email = authEmailInput.value.trim();
+    const password = authPasswordInput.value;
+    if (!email || !password) {
+      showAuthError('Please enter email and password.');
+      return;
+    }
+    btnSideRegister.disabled = true;
+    btnSideRegister.textContent = 'Registering...';
+    hideAuthError();
+
+    chrome.runtime.sendMessage({
+      type: 'API_REQUEST',
+      endpoint: '/auth/register',
+      method: 'POST',
+      body: { email, password }
+    }, (response) => {
+      btnSideRegister.disabled = false;
+      btnSideRegister.textContent = 'Register';
+      if (response && response.status === 201 && response.data.token) {
+        chrome.runtime.sendMessage({
+          type: 'SET_AUTH_STATE',
+          token: response.data.token,
+          email: response.data.user.email
+        }, () => {
+          checkAuth();
+        });
+      } else {
+        const msg = response && response.data ? response.data.error : 'Registration failed.';
+        showAuthError(msg);
+      }
+    });
+  });
 
   // Load latest data from storage if available
   chrome.storage.local.get('latest_extracted_data', (result) => {
@@ -384,10 +462,24 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.sendMessage({ type: 'GET_AUTH_STATE' }, (state) => {
       if (state && state.loggedIn) {
         authStatus.textContent = `Active: ${state.email}`;
+        sidepanelAuthCard.classList.add('hidden');
+        sidepanelMainContent.classList.remove('hidden');
       } else {
         authStatus.textContent = 'Not signed in';
+        sidepanelAuthCard.classList.remove('hidden');
+        sidepanelMainContent.classList.add('hidden');
       }
     });
+  }
+
+  function showAuthError(msg) {
+    authMsg.textContent = msg;
+    authMsg.classList.remove('hidden');
+  }
+
+  function hideAuthError() {
+    authMsg.classList.add('hidden');
+    authMsg.textContent = '';
   }
 
   function showError(msg) {
