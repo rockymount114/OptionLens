@@ -9,7 +9,11 @@
 <body>
   <header>
     <div class="logo">OptionLens</div>
-    <div id="auth-status" class="auth-indicator">Checking auth...</div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span id="plan-badge" class="badge badge-free hidden">FREE</span>
+      <button id="btn-side-upgrade" class="btn btn-primary hidden" style="font-size: 11px; padding: 4px 10px; margin: 0; border-radius: 6px;">✨ Upgrade</button>
+      <div id="auth-status" class="auth-indicator">Checking auth...</div>
+    </div>
   </header>
 
   <!-- Error display container -->
@@ -40,7 +44,7 @@
   </div>
 
   <!-- Main Sidepanel Content (Visible when logged in) -->
-  <div id="sidepanel-main-content">
+  <div id="sidepanel-main-content" class="hidden">
     <!-- Section 1: Interactive Trade Parameters -->
     <div class="section-card">
       <div class="section-title">
@@ -60,6 +64,10 @@
             <option value="cash_secured_put">Cash-Secured Put</option>
             <option value="long_call">Long Call</option>
             <option value="long_put">Long Put</option>
+            <option value="bull_call_spread">Bull Call Spread</option>
+            <option value="bear_put_spread">Bear Put Spread</option>
+            <option value="long_straddle">Long Straddle</option>
+            <option value="long_strangle">Long Strangle</option>
           </select>
         </div>
         <div class="form-group">
@@ -152,6 +160,14 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Section 5: Recent Analyses -->
+    <div class="section-card">
+      <div class="section-title">Recent Analyses</div>
+      <ul id="history-list" class="history-list">
+        <li style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 10px 0;">No history loaded.</li>
+      </ul>
     </div>
   </div>
 

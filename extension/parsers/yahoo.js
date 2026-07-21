@@ -30,9 +30,16 @@ const YahooParser = {
     }
 
     // --- 2. Underlying Price ---
-    const priceEl = document.querySelector('[data-field="regularMarketPrice"]') || 
-                    document.querySelector('.Fz\\(36px\\)') || 
-                    document.querySelector('fin-streamer[data-field="regularMarketPrice"]');
+    let priceEl = null;
+    if (context.symbol) {
+      priceEl = document.querySelector(`fin-streamer[data-symbol="${context.symbol}"][data-field="regularMarketPrice"]`) ||
+                document.querySelector(`[data-symbol="${context.symbol}"][data-field="regularMarketPrice"]`);
+    }
+    if (!priceEl) {
+      priceEl = document.querySelector('[data-field="regularMarketPrice"]') || 
+                document.querySelector('.Fz\\(36px\\)') || 
+                document.querySelector('fin-streamer[data-field="regularMarketPrice"]');
+    }
     if (priceEl) {
       context.underlying_price = OptionLensCommon.parseNumber(priceEl.textContent);
     }

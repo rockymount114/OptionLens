@@ -33,6 +33,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initial State Check
   await checkAuthState();
 
+  // Listen for storage changes to keep auth state in sync
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'local' && (changes.auth_token || changes.user_email)) {
+      checkAuthState();
+    }
+  });
+
   // Navigation / Toggles
   btnToggleSignup.addEventListener('click', () => {
     unauthView.classList.add('hidden');

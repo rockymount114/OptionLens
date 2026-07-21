@@ -42,9 +42,40 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSideLogin = document.getElementById('btn-side-login');
   const btnSideRegister = document.getElementById('btn-side-register');
   const authMsg = document.getElementById('auth-msg');
+  const planBadge = document.getElementById('plan-badge');
+  const btnSideUpgrade = document.getElementById('btn-side-upgrade');
+  const historyList = document.getElementById('history-list');
 
   // Load initial authentication state
   checkAuth();
+
+  // Upgrade button handler
+  if (btnSideUpgrade) {
+    btnSideUpgrade.addEventListener('click', () => {
+      btnSideUpgrade.disabled = true;
+      btnSideUpgrade.textContent = '...';
+      chrome.runtime.sendMessage({
+        type: 'API_REQUEST',
+        endpoint: '/billing/create-checkout-session',
+        method: 'POST'
+      }, (response) => {
+        btnSideUpgrade.disabled = false;
+        btnSideUpgrade.textContent = '✨ Upgrade';
+        if (response && response.status === 200 && response.data.url) {
+          chrome.tabs.create({ url: response.data.url });
+        } else {
+          alert('Upgrade failed or billing not configured.');
+        }
+      });
+    });
+  }
+
+  // Listen for storage changes to keep auth state in sync
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'local' && (changes.auth_token || changes.user_email)) {
+      checkAuth();
+    }
+  });
 
   // Embedded Sidepanel Auth handlers
   btnSideLogin.addEventListener('click', () => {
@@ -197,6 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (response && response.status === 200 && response.data) {
           renderServerExplanation(response.data);
+          // Refresh history after a successful analysis
+          fetchHistory();
         } else {
           const errMsg = response && response.data && response.data.error 
             ? response.data.error 
@@ -330,6 +363,71 @@ document.addEventListener('DOMContentLoaded', () => {
       ].map(sc => calculateScenarioLongPut(sc, stockPrice, strike, premium, multiplier));
     }
 
+    else if (strategy === 'bull_call_spread') {
+      const shortStrike = strike + 5.0;
+      maxProfit = (5.0 - premium) * multiplier;
+      maxLoss = premium * multiplier;
+      breakeven = strike + premium;
+      optYield = (maxProfit / maxLoss) * 100;
+
+      scenarios = [
+        { pct: -10, label: '-10% Dip' },
+        { customVal: strike, label: 'Long Strike' },
+        { customVal: breakeven, label: 'Breakeven' },
+        { customVal: shortStrike, label: 'Short Strike' },
+        { pct: 10, label: '+10% Rise' }
+      ].map(sc => calculateScenarioBullCallSpread(sc, stockPrice, strike, shortStrike, premium, multiplier));
+    }
+
+    else if (strategy === 'bear_put_spread') {
+      const shortStrike = strike - 5.0;
+      maxProfit = (5.0 - premium) * multiplier;
+      maxLoss = premium * multiplier;
+      breakeven = strike - premium;
+      optYield = (maxProfit / maxLoss) * 100;
+
+      scenarios = [
+        { pct: -10, label: '-10% Dip' },
+        { customVal: shortStrike, label: 'Short Strike' },
+        { customVal: breakeven, label: 'Breakeven' },
+        { customVal: strike, label: 'Long Strike' },
+        { pct: 10, label: '+10% Rise' }
+      ].map(sc => calculateScenarioBearPutSpread(sc, stockPrice, strike, shortStrike, premium, multiplier));
+    }
+
+    else if (strategy === 'long_straddle') {
+      maxProfit = Infinity;
+      maxLoss = premium * multiplier;
+      breakeven = strike + premium;
+      optYield = -100;
+
+      scenarios = [
+        { pct: -20, label: '-20% Drop' },
+        { customVal: strike - premium, label: 'Lower Breakeven' },
+        { customVal: strike, label: 'At Strike' },
+        { customVal: strike + premium, label: 'Upper Breakeven' },
+        { pct: 20, label: '+20% Rise' }
+      ].map(sc => calculateScenarioLongStraddle(sc, stockPrice, strike, premium, multiplier));
+    }
+
+    else if (strategy === 'long_strangle') {
+      const callStrike = strike + 5.0;
+      const putStrike = strike - 5.0;
+      maxProfit = Infinity;
+      maxLoss = premium * multiplier;
+      breakeven = callStrike + premium;
+      optYield = -100;
+
+      scenarios = [
+        { pct: -20, label: '-20% Drop' },
+        { customVal: putStrike - premium, label: 'Lower Breakeven' },
+        { customVal: putStrike, label: 'Put Strike' },
+        { customVal: callStrike, label: 'Call Strike' },
+        { customVal: callStrike + premium, label: 'Upper Breakeven' },
+        { pct: 20, label: '+20% Rise' }
+      ].map(sc => calculateScenarioLongStrangle(sc, stockPrice, putStrike, callStrike, premium, multiplier));
+    }
+
     // Format payoff metrics display
     metricMaxProfit.textContent = maxProfit === Infinity ? 'Infinite' : formatCurrency(maxProfit);
     metricMaxProfit.className = `metric-value value-green`;
@@ -411,6 +509,61 @@ document.addEventListener('DOMContentLoaded', () => {
     return { price, label: sc.label, pnl, desc };
   }
 
+  function calculateScenarioBullCallSpread(sc, entryPrice, longStrike, shortStrike, premium, multiplier) {
+    const price = sc.customVal !== undefined ? sc.customVal : entryPrice * (1 + sc.pct / 100);
+    let pnl = 0;
+    let desc = '';
+
+    if (price >= shortStrike) {
+      pnl = (shortStrike - longStrike - premium) * multiplier;
+      desc = `Max profit. Stock above short strike $${shortStrike.toFixed(2)}.`;
+    } else if (price <= longStrike) {
+      pnl = -premium * multiplier;
+      desc = `Max loss. Stock below long strike $${longStrike.toFixed(2)}.`;
+    } else {
+      pnl = (price - longStrike - premium) * multiplier;
+      desc = `Partial recovery. Option is ITM, but net profit depends on breakeven.`;
+    }
+    return { price, label: sc.label, pnl, desc };
+  }
+
+  function calculateScenarioBearPutSpread(sc, entryPrice, longStrike, shortStrike, premium, multiplier) {
+    const price = sc.customVal !== undefined ? sc.customVal : entryPrice * (1 + sc.pct / 100);
+    let pnl = 0;
+    let desc = '';
+
+    if (price <= shortStrike) {
+      pnl = (longStrike - shortStrike - premium) * multiplier;
+      desc = `Max profit. Stock below short strike $${shortStrike.toFixed(2)}.`;
+    } else if (price >= longStrike) {
+      pnl = -premium * multiplier;
+      desc = `Max loss. Stock above long strike $${longStrike.toFixed(2)}.`;
+    } else {
+      pnl = (longStrike - price - premium) * multiplier;
+      desc = `Partial recovery. Option is ITM, but net profit depends on breakeven.`;
+    }
+    return { price, label: sc.label, pnl, desc };
+  }
+
+  function calculateScenarioLongStraddle(sc, entryPrice, strike, premium, multiplier) {
+    const price = sc.customVal !== undefined ? sc.customVal : entryPrice * (1 + sc.pct / 100);
+    const pnl = (Math.abs(price - strike) - premium) * multiplier;
+    let desc = pnl > 0 ? `ITM profit from sharp move.` : `Movement not enough to cover premium paid.`;
+    return { price, label: sc.label, pnl, desc };
+  }
+
+  function calculateScenarioLongStrangle(sc, entryPrice, putStrike, callStrike, premium, multiplier) {
+    const price = sc.customVal !== undefined ? sc.customVal : entryPrice * (1 + sc.pct / 100);
+    let pnl = -premium * multiplier;
+    if (price > callStrike) {
+      pnl = (price - callStrike - premium) * multiplier;
+    } else if (price < putStrike) {
+      pnl = (putStrike - price - premium) * multiplier;
+    }
+    let desc = pnl > 0 ? `ITM profit from large move.` : `Stock remains between strikes. Options expire worthless.`;
+    return { price, label: sc.label, pnl, desc };
+  }
+
   function renderScenariosTable(scenarios) {
     scenarioTbody.innerHTML = '';
     scenarios.forEach(sc => {
@@ -464,11 +617,95 @@ document.addEventListener('DOMContentLoaded', () => {
         authStatus.textContent = `Active: ${state.email}`;
         sidepanelAuthCard.classList.add('hidden');
         sidepanelMainContent.classList.remove('hidden');
+
+        // Fetch current plan status for badge
+        chrome.runtime.sendMessage({
+          type: 'API_REQUEST',
+          endpoint: '/usage/me',
+          method: 'GET'
+        }, (res) => {
+          if (res && res.status === 200 && res.data) {
+            const { plan } = res.data;
+            if (planBadge) {
+              planBadge.textContent = plan.toUpperCase();
+              planBadge.className = `badge badge-${plan}`;
+              planBadge.classList.remove('hidden');
+            }
+            if (btnSideUpgrade) {
+              if (plan === 'free') {
+                btnSideUpgrade.classList.remove('hidden');
+              } else {
+                btnSideUpgrade.classList.add('hidden');
+              }
+            }
+          }
+        });
+
+        // Fetch analysis history
+        fetchHistory();
       } else {
         authStatus.textContent = 'Not signed in';
         sidepanelAuthCard.classList.remove('hidden');
         sidepanelMainContent.classList.add('hidden');
+        if (planBadge) planBadge.classList.add('hidden');
+        if (btnSideUpgrade) btnSideUpgrade.classList.add('hidden');
       }
+    });
+  }
+
+  function fetchHistory() {
+    chrome.runtime.sendMessage({
+      type: 'API_REQUEST',
+      endpoint: '/analysis/history',
+      method: 'GET'
+    }, (res) => {
+      if (res && res.status === 200 && Array.isArray(res.data)) {
+        renderHistory(res.data);
+      }
+    });
+  }
+
+  function renderHistory(items) {
+    if (!historyList) return;
+    historyList.innerHTML = '';
+    
+    if (items.length === 0) {
+      historyList.innerHTML = '<li style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 10px 0;">No history loaded.</li>';
+      return;
+    }
+    
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'history-item';
+      
+      const date = new Date(item.created_at).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      const strategyLabel = item.strategy.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      
+      li.innerHTML = `
+        <div class="history-header">
+          <span class="history-symbol">${item.symbol}</span>
+          <span class="history-date">${date}</span>
+        </div>
+        <div class="history-strategy">${strategyLabel} (${item.broker})</div>
+      `;
+      
+      li.addEventListener('click', () => {
+        // Load the saved state from history
+        if (item.request_payload) {
+          prefillForm(item.request_payload);
+        }
+        if (item.response_payload) {
+          renderServerExplanation(item.response_payload);
+        }
+      });
+      
+      historyList.appendChild(li);
     });
   }
 
