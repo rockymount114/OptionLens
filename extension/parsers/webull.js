@@ -23,39 +23,59 @@ const WebullParser = {
 
     // --- 1. Symbol ---
     let symbolText = null;
-    const symbolSelectors = [
-      '#DomWrap [class*="ticker-name"]',
-      '#DomWrap [class*="tickerName"]',
-      '#DomWrap [class*="symbol"]',
-      '#DomWrap [class*="ticker"]',
-      '#DomWrap [class*="name"]',
-      '[class*="ticker-name"]',
-      '[class*="tickerName"]',
-      '[class*="symbol"]',
-      '[class*="ticker"]',
-      '[class*="name"]',
-      '.ticker-name',
-      '.instrument-name',
-      '.quote-title h2'
-    ];
-    
-    for (const sel of symbolSelectors) {
-      try {
-        const el = document.querySelector(sel);
-        if (el && el.textContent) {
-          const text = el.textContent.trim();
-          const match = text.match(/\b([A-Z]{1,5})\b/);
-          if (match) {
-            const possibleSymbol = match[1];
-            if (!['STOCK', 'PRICE', 'WEBULL', 'NYSE', 'NASDAQ', 'QUOTE', 'NEWS', 'PORTFOLIO', 'WATCH', 'LIST', 'APP', 'ORDER', 'TRADE'].includes(possibleSymbol)) {
-              symbolText = possibleSymbol;
-              break;
+
+    // Prioritize the specific XPath selector for Webull stock symbol
+    try {
+      const xpath = '//*[@id="DomWrap"]/div[2]/div[1]/div/div';
+      const symbolEl = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      if (symbolEl && symbolEl.textContent) {
+        const text = symbolEl.textContent.trim();
+        const match = text.match(/\b([A-Z]{1,5})\b/);
+        if (match) {
+          symbolText = match[1];
+        }
+      }
+    } catch (e) {
+      console.warn('[OptionLens] Webull Symbol XPath lookup failed, falling back:', e);
+    }
+
+    // Fallback 1: Broad-spectrum CSS selector scanning
+    if (!symbolText) {
+      const symbolSelectors = [
+        '#DomWrap [class*="ticker-name"]',
+        '#DomWrap [class*="tickerName"]',
+        '#DomWrap [class*="symbol"]',
+        '#DomWrap [class*="ticker"]',
+        '#DomWrap [class*="name"]',
+        '[class*="ticker-name"]',
+        '[class*="tickerName"]',
+        '[class*="symbol"]',
+        '[class*="ticker"]',
+        '[class*="name"]',
+        '.ticker-name',
+        '.instrument-name',
+        '.quote-title h2'
+      ];
+      
+      for (const sel of symbolSelectors) {
+        try {
+          const el = document.querySelector(sel);
+          if (el && el.textContent) {
+            const text = el.textContent.trim();
+            const match = text.match(/\b([A-Z]{1,5})\b/);
+            if (match) {
+              const possibleSymbol = match[1];
+              if (!['STOCK', 'PRICE', 'WEBULL', 'NYSE', 'NASDAQ', 'QUOTE', 'NEWS', 'PORTFOLIO', 'WATCH', 'LIST', 'APP', 'ORDER', 'TRADE'].includes(possibleSymbol)) {
+                symbolText = possibleSymbol;
+                break;
+              }
             }
           }
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
     }
     
+    // Fallback 2: Extract from page title
     if (!symbolText) {
       symbolText = this.extractSymbolFromTitle(document.title);
     }
