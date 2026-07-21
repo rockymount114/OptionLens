@@ -66,6 +66,35 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ success: true });
   }
 
+  else if (message.type === 'AUTO_EXTRACTED_DATA') {
+    chrome.storage.local.set({ latest_extracted_data: message.data }, () => {
+      chrome.runtime.sendMessage({ type: 'DATA_UPDATED', data: message.data }, () => {
+        if (chrome.runtime.lastError) {
+          // Ignore connection warnings when side panel is closed
+        }
+      });
+    });
+    sendResponse({ success: true });
+  }
+
+  else if (message.type === 'FETCH_YAHOO_FUNDAMENTALS') {
+    const modules = 'quoteType,defaultKeyStatistics,financialData,recommendationTrend,assetProfile,summaryDetail';
+    fetch(`https://query1.finance.yahoo.com/v10/finance/quoteSummary/${message.symbol}?modules=${modules}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Yahoo API HTTP error: ' + res.status);
+        return res.json();
+      })
+      .then(data => {
+        const result = data.quoteSummary && data.quoteSummary.result ? data.quoteSummary.result[0] : null;
+        sendResponse({ success: true, data: result });
+      })
+      .catch(err => {
+        console.error('[OptionLens] Error fetching Yahoo Finance fundamentals:', err);
+        sendResponse({ success: false, error: err.message });
+      });
+    return true; // Keep channel open for async response
+  }
+
   else if (message.type === 'API_REQUEST') {
     apiRequest(message.endpoint, message.method, message.body)
       .then(response => sendResponse(response));

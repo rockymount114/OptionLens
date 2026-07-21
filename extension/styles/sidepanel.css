@@ -336,4 +336,129 @@ header {
   color: var(--text-muted);
 }
 
+/* Company Fundamentals Section Styles */
+.fundamentals-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--border);
+  margin-bottom: 12px;
+}
+.company-name-container {
+  display: flex;
+  flex-direction: column;
+}
+.company-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-main);
+  background: linear-gradient(90deg, #f3f4f6 0%, #a855f7 120%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.company-sector-industry {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.fundamentals-sub-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 12px 0 6px 0;
+  padding-left: 4px;
+  border-left: 2px solid var(--secondary);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.stat-item {
+  background-color: rgba(26, 35, 51, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.stat-item:hover {
+  background-color: rgba(99, 102, 241, 0.05);
+  border-color: rgba(99, 102, 241, 0.2);
+  transform: translateY(-1px);
+}
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+.stat-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.analyst-row {
+  display: flex;
+  gap: 8px;
+}
+.analyst-box {
+  flex: 1;
+  background-color: rgba(26, 35, 51, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.analyst-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.analyst-rating {
+  font-size: 14px;
+  font-weight: 800;
+}
+.analyst-target {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+.summary-box {
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+}
+.company-summary {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  max-height: 70px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+/* Style the scrollbar for custom scrolls */
+.company-summary::-webkit-scrollbar {
+  width: 4px;
+}
+.company-summary::-webkit-scrollbar-track {
+  background: transparent;
+}
+.company-summary::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+.company-summary::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 

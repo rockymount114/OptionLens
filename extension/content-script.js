@@ -122,11 +122,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
+function autoExtractAndNotify() {
+  const payload = runExtraction();
+  if (payload && payload.symbol) {
+    chrome.runtime.sendMessage({
+      type: 'AUTO_EXTRACTED_DATA',
+      data: payload
+    });
+  }
+}
+
 // Run check on load
 if (document.readyState === 'complete') {
   injectTriggerButton();
+  autoExtractAndNotify();
 } else {
-  window.addEventListener('load', injectTriggerButton);
+  window.addEventListener('load', () => {
+    injectTriggerButton();
+    autoExtractAndNotify();
+  });
 }
 
 // Observe URL changes (common in SPA websites like Robinhood)
@@ -134,6 +148,9 @@ let lastUrl = location.href;
 new MutationObserver(() => {
   if (location.href !== lastUrl) {
     lastUrl = location.href;
-    setTimeout(injectTriggerButton, 2000); // Wait for SPA DOM render
+    setTimeout(() => {
+      injectTriggerButton();
+      autoExtractAndNotify();
+    }, 2000); // Wait for SPA DOM render
   }
 }).observe(document, { subtree: true, childList: true });

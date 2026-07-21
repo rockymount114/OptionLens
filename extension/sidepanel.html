@@ -129,6 +129,116 @@
       </div>
     </div>
 
+    <!-- Section 2.5: Company Fundamentals -->
+    <div class="section-card" id="company-fundamentals-card">
+      <div class="section-title">
+        <span>Company Insights</span>
+        <span id="fundamentals-symbol-badge" class="badge badge-free">N/A</span>
+      </div>
+      
+      <div id="fundamentals-loading" class="hidden" style="text-align: center; padding: 12px; color: var(--text-muted);">
+        <span class="loading-spinner"></span> <span style="margin-left: 8px;">Fetching company insights...</span>
+      </div>
+      
+      <div id="fundamentals-error" class="hidden" style="color: var(--danger); font-size: 12px; padding: 8px; text-align: center;">
+        Could not load company insights.
+      </div>
+
+      <div id="fundamentals-content">
+        <!-- Sub-section: Company Profile -->
+        <div class="fundamentals-header">
+          <div class="company-name-container">
+            <span id="company-name" class="company-name">Select a ticker to load insights</span>
+            <span id="company-sector-industry" class="company-sector-industry"></span>
+          </div>
+        </div>
+
+        <div class="fundamentals-body">
+          <!-- Overview stats -->
+          <div class="fundamentals-sub-title">Overview & Valuation</div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Market Cap</span>
+              <span id="stat-mcap" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">P/E Ratio</span>
+              <span id="stat-pe" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Forward P/E</span>
+              <span id="stat-fpe" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Price / Book</span>
+              <span id="stat-pb" class="stat-value">-</span>
+            </div>
+          </div>
+
+          <!-- Growth & Margins -->
+          <div class="fundamentals-sub-title">Growth & Margins</div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Revenue Growth</span>
+              <span id="stat-revgrowth" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Profit Margin</span>
+              <span id="stat-profitmargin" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Operating Margin</span>
+              <span id="stat-opmargin" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">PEG Ratio</span>
+              <span id="stat-peg" class="stat-value">-</span>
+            </div>
+          </div>
+
+          <!-- Debt & Risk -->
+          <div class="fundamentals-sub-title">Debt & Risk</div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Total Debt</span>
+              <span id="stat-debt" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Debt / Equity</span>
+              <span id="stat-de" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Beta (Volatility)</span>
+              <span id="stat-beta" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Overall Risk</span>
+              <span id="stat-risk" class="stat-value">-</span>
+            </div>
+          </div>
+
+          <!-- Analyst expectations & Profile -->
+          <div class="fundamentals-sub-title">Analyst Expectations</div>
+          <div class="analyst-row">
+            <div class="analyst-box">
+              <span class="analyst-label">Consensus Rating</span>
+              <span id="stat-recommendation" class="analyst-rating">-</span>
+            </div>
+            <div class="analyst-box">
+              <span class="analyst-label">Mean Price Target</span>
+              <span id="stat-targetprice" class="analyst-target">-</span>
+            </div>
+          </div>
+
+          <!-- Business summary -->
+          <div class="summary-box" style="margin-top: 10px;">
+            <div class="summary-title" style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Business Summary</div>
+            <p id="company-summary" class="company-summary">No summary available.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Section 3: AI / Server-Side Explanation -->
     <div class="section-card">
       <div class="section-title">Educational Explanation</div>
