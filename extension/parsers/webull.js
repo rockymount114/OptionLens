@@ -22,14 +22,46 @@ const WebullParser = {
     };
 
     // --- 1. Symbol ---
-    let symbolEl = document.querySelector('.ticker-name') || 
-                   document.querySelector('.instrument-name') ||
-                   document.querySelector('.quote-title h2');
-    if (symbolEl) {
-      context.symbol = symbolEl.textContent;
+    let symbolText = null;
+    const symbolSelectors = [
+      '#DomWrap [class*="ticker-name"]',
+      '#DomWrap [class*="tickerName"]',
+      '#DomWrap [class*="symbol"]',
+      '#DomWrap [class*="ticker"]',
+      '#DomWrap [class*="name"]',
+      '[class*="ticker-name"]',
+      '[class*="tickerName"]',
+      '[class*="symbol"]',
+      '[class*="ticker"]',
+      '[class*="name"]',
+      '.ticker-name',
+      '.instrument-name',
+      '.quote-title h2'
+    ];
+    
+    for (const sel of symbolSelectors) {
+      try {
+        const el = document.querySelector(sel);
+        if (el && el.textContent) {
+          const text = el.textContent.trim();
+          const match = text.match(/\b([A-Z]{1,5})\b/);
+          if (match) {
+            const possibleSymbol = match[1];
+            if (!['STOCK', 'PRICE', 'WEBULL', 'NYSE', 'NASDAQ', 'QUOTE', 'NEWS', 'PORTFOLIO', 'WATCH', 'LIST', 'APP', 'ORDER', 'TRADE'].includes(possibleSymbol)) {
+              symbolText = possibleSymbol;
+              break;
+            }
+          }
+        }
+      } catch (e) {}
     }
-    if (!context.symbol) {
-      context.symbol = this.extractSymbolFromTitle(document.title);
+    
+    if (!symbolText) {
+      symbolText = this.extractSymbolFromTitle(document.title);
+    }
+    
+    if (symbolText) {
+      context.symbol = symbolText;
     }
 
     // --- 2. Price ---
