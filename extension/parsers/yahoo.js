@@ -31,15 +31,28 @@ const YahooParser = {
 
     // --- 2. Underlying Price ---
     let priceEl = null;
-    if (context.symbol) {
+
+    // Prioritize the specific XPath selector for Yahoo Finance options page stock price
+    try {
+      const xpath = '//*[@id="main-content-wrapper"]/section[1]/div[2]/div[1]/section/div/section[1]/div[1]/span[1]';
+      priceEl = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    } catch (e) {
+      console.warn('[OptionLens] XPath lookup failed, falling back:', e);
+    }
+
+    // Fallback 1: Symbol-specific selectors
+    if (!priceEl && context.symbol) {
       priceEl = document.querySelector(`fin-streamer[data-symbol="${context.symbol}"][data-field="regularMarketPrice"]`) ||
                 document.querySelector(`[data-symbol="${context.symbol}"][data-field="regularMarketPrice"]`);
     }
+
+    // Fallback 2: General selectors
     if (!priceEl) {
       priceEl = document.querySelector('[data-field="regularMarketPrice"]') || 
                 document.querySelector('.Fz\\(36px\\)') || 
                 document.querySelector('fin-streamer[data-field="regularMarketPrice"]');
     }
+
     if (priceEl) {
       context.underlying_price = OptionLensCommon.parseNumber(priceEl.textContent);
     }
