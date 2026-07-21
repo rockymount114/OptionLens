@@ -22,17 +22,29 @@ const WebullParser = {
     };
 
     // --- 1. Symbol ---
-    const symbolEl = document.querySelector('.ticker-name') || 
-                     document.querySelector('.instrument-name') ||
-                     document.querySelector('.quote-title h2');
+    let symbolEl = document.querySelector('.ticker-name') || 
+                   document.querySelector('.instrument-name') ||
+                   document.querySelector('.quote-title h2');
     if (symbolEl) {
       context.symbol = symbolEl.textContent;
     }
+    if (!context.symbol) {
+      context.symbol = this.extractSymbolFromTitle(document.title);
+    }
 
     // --- 2. Price ---
-    const priceEl = document.querySelector('.ticker-price') || 
-                    document.querySelector('.quote-price') ||
-                    document.querySelector('.price-num');
+    let priceEl = null;
+    try {
+      const xpath = '//*[@id="DomWrap"]/div[2]/div[2]/div/div[1]';
+      priceEl = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    } catch (e) {
+      console.warn('[OptionLens] Webull XPath lookup failed, falling back:', e);
+    }
+    if (!priceEl) {
+      priceEl = document.querySelector('.ticker-price') || 
+                document.querySelector('.quote-price') ||
+                document.querySelector('.price-num');
+    }
     if (priceEl) {
       context.underlying_price = OptionLensCommon.parseNumber(priceEl.textContent);
     }
@@ -72,6 +84,23 @@ const WebullParser = {
     }
 
     return context;
+  },
+
+  extractSymbolFromTitle(title) {
+    if (!title) return null;
+    const bracketMatch = title.match(/\(([A-Z]{1,5})\)/);
+    if (bracketMatch) return bracketMatch[1];
+    
+    const startMatch = title.match(/^([A-Z]{1,5})\b/);
+    if (startMatch) return startMatch[1];
+    
+    const words = title.split(/[\s,.\-|/()]+/);
+    for (const w of words) {
+      if (/^[A-Z]{1,5}$/.test(w) && !['STOCK', 'PRICE', 'WEBULL', 'NYSE', 'NASDAQ', 'QUOTE', 'NEWS', 'PORTFOLIO'].includes(w)) {
+        return w;
+      }
+    }
+    return null;
   }
 };
 
