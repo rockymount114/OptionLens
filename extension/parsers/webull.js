@@ -124,6 +124,22 @@ const WebullParser = {
       if (strikeEl) {
         context.strike = OptionLensCommon.parseNumber(strikeEl.textContent);
       }
+    }
+
+    // Expiration date lookup using exact user-provided XPath
+    try {
+      const xpath = '//*[@id="app"]/section/section/section/section/main/div/div/div[2]/div[1]/div[1]/div[1]/div[3]/div[2]/div/span';
+      const expEl = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      if (expEl && expEl.textContent) {
+        context.expiration = OptionLensCommon.normalizeDate(expEl.textContent);
+      }
+    } catch (e) {
+      console.warn('[OptionLens] Webull Expiration XPath lookup failed, falling back:', e);
+    }
+
+    // Expiration date fallback
+    if (!context.expiration && selectedRows.length > 0) {
+      const row = selectedRows[0];
       const expEl = row.querySelector('.expiration') || row.querySelector('.date');
       if (expEl) {
         context.expiration = OptionLensCommon.normalizeDate(expEl.textContent);
