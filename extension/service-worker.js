@@ -53,7 +53,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         chrome.sidePanel.open({ tabId: sender.tab.id })
           .then(() => {
             // Send message to sidepanel indicating data is updated
-            chrome.runtime.sendMessage({ type: 'DATA_UPDATED', data: message.data });
+            chrome.runtime.sendMessage({ type: 'DATA_UPDATED', data: message.data }, () => {
+              if (chrome.runtime.lastError) {
+                // Silently ignore connection warnings: sidepanel pulls initial data from storage on startup anyway
+                console.log('[OptionLens] Sidepanel initialization in progress, connection warning safely ignored.');
+              }
+            });
           })
           .catch((err) => console.error('[OptionLens] Error opening sidepanel:', err));
       }
